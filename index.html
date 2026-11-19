@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Birth Patterns Descriptive &amp; Predictive Analytics</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<aside id="side">
+  <h3>Data</h3>
+  <div class="lbl">Upload a compatible CSV</div>
+  <div id="drop"><b>Drag and drop file here</b><small>Limit 200MB per file • CSV</small><button id="browse" type="button">Browse files</button><input type="file" id="file" accept=".csv" hidden></div>
+  <p class="muted" id="src">Using the included birth dataset</p>
+  <h3>Filters</h3>
+  <div class="lbl">Year</div>
+  <div class="rs"><div class="track"><div id="fill"></div><input type="range" id="yFrom" min="2020" max="2024" value="2020"><input type="range" id="yTo" min="2020" max="2024" value="2024"></div><div class="vals"><span id="v1"></span><span id="v2"></span></div></div>
+  <label>Region <select id="region"></select></label>
+  <label>Record type
+    <select id="rtype"><option value="0" selected>Original only (notebook data)</option><option value="all">All (incl. simulated)</option><option value="1">Simulated only</option></select></label>
+  <label>Outcome
+    <select id="outcome"><option value="all">All</option><option value="1">Positive (high marital births)</option><option value="0">Negative (low marital births)</option></select></label>
+  <h3>Model settings</h3>
+  <label>Machine-learning model
+    <select id="model"><option>Gaussian Naive Bayes</option><option>Decision Tree</option><option>Random Forest</option><option>Logistic Regression</option></select></label>
+</aside>
+<main>
+  <h1>Birth Patterns Descriptive &amp; Predictive Analytics</h1>
+  <p class="muted">Interactive exploration and an educational machine-learning model (positive = marital births above the median)</p>
+  <nav id="tabs">
+    <button data-t="overview" class="on">Overview</button><button data-t="explore">Explore</button>
+    <button data-t="nb">Notebook Results</button><button data-t="model">Model Analytics</button><button data-t="est">Birth Estimator</button><button data-t="dq">Data Quality</button>
+  </nav>
+
+  <section id="overview">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="card"><h4>Outcome Distribution</h4><canvas id="c_out"></canvas></div>
+      <div class="card"><h4>Total Births Distribution by Outcome</h4><canvas id="c_hist"></canvas></div>
+    </div>
+  </section>
+
+  <section id="explore" hidden>
+    <div class="grid2">
+      <div class="card"><h4>Births by Year (Marital vs Non-marital)</h4><canvas id="c_year"></canvas></div>
+      <div class="card"><h4>Average Births per Record by Region</h4><canvas id="c_reg"></canvas></div>
+      <div class="card"><h4>Male vs Female Births by Year</h4><canvas id="c_sex"></canvas></div>
+      <div class="card"><h4>Marital Status Share</h4><canvas id="c_mar"></canvas></div>
+    </div>
+    <div class="card"><h4>Filtered Data (first 15 rows)</h4><div class="scroll"><table id="tbl"></table></div></div>
+  </section>
+
+  <section id="nb" hidden>
+    <p class="muted">Descriptive statistics and figures from the Colab notebook. The table is computed from the current filters (choose "Original only" to match the notebook exactly); the figures are the notebook's own outputs.</p>
+    <div class="card"><h4>Descriptive Statistics Table</h4><div class="scroll"><table id="stats"></table></div></div>
+    <div class="card"><h4>Yearly Trend by Gender · Marital vs Non-Marital · Correlation Heatmap</h4><img class="fig" id="g_eda" alt="EDA figure"></div>
+    <div class="grid2">
+      <div class="card"><h4>Distribution of Total Live Births per Region/Year</h4><img class="fig" id="g_bins" alt="Bins"></div>
+      <div class="card"><h4>Scatterplot of Total Female vs Total Male Births</h4><img class="fig" id="g_scatter" alt="Scatter"></div>
+    </div>
+    <div class="card"><h4>Distribution Curves (KDE) and Spread of Birth Variables</h4><img class="fig" id="g_dist" alt="KDE and boxplot"></div>
+  </section>
+
+  <section id="pane-model" hidden>
+    <p class="muted" id="modelInfo"></p>
+    <div class="kpis" id="mkpis"></div>
+    <div class="grid2">
+      <div class="card"><h4>Confusion Matrix (test set)</h4><table id="cm" class="cm"></table></div>
+      <div class="card"><h4>Model Comparison</h4><canvas id="c_cmp"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h4>Classification Report (test set)</h4><div class="scroll"><table id="rep"></table></div></div>
+      <div class="card"><h4>Model Performance Comparison</h4><div class="scroll"><table id="cmpt"></table></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h4>Confusion Matrices (all 4 models)</h4><img class="fig" id="g_cm" alt="Confusion matrices"></div>
+      <div class="card"><h4>ROC Curves Comparison (All 4 Models)</h4><img class="fig" id="g_roc" alt="ROC curves"></div>
+    </div>
+  </section>
+
+  <section id="est" hidden>
+    <div class="card">
+      <h4>Predict whether a record has High Marital Births</h4>
+      <div class="form" id="form"></div>
+      <button id="go">Predict</button>
+      <div id="result"></div>
+    </div>
+  </section>
+
+  <section id="dq" hidden>
+    <div class="kpis" id="dqk"></div>
+    <div class="card"><h4>Column Summary (filtered data)</h4><div class="scroll"><table id="dqt"></table></div></div>
+    <p class="muted">⚠ 4,900 of the 5,000 records are <b>simulated</b> for testing and are not official PSA statistics. Use the "Record type" filter to view original records only.</p>
+  </section>
+</main>
+<script src="data.js"></script>
+<script src="figures.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
